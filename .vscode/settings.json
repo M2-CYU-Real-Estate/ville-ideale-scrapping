@@ -1,0 +1,8 @@
+{
+    "files.eol": "\n",
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "formattingToggle.affects": [
+        "editor.formatOnSave"
+    ]
+}

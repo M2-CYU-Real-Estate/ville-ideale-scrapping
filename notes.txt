@@ -1,0 +1,73 @@
+URL de base : https://www.ville-ideale.fr
+
+WARNING : très contraingnant sur le nombre de requêtes passées, probablement attendre 5 secondes entre chaque requête
+
+==== PLAN ====
+
+    ---- Récupérer le nom de toutes les villes ----
+        - Aller sur https://www.ville-ideale.fr/villespardepts.php
+        - Trouver les liens vers les départements : 
+            const aListDOM = Array.from(document.querySelectorAll("p#listedepts > a"));
+        - Pour chaque a : 
+            - On clique sur le lien (pas moyen d'utiliser l'URL, c'est dynamique)
+            - Trouver les liens de ville : 
+                const l = Array.from(document.querySelectorAll("div#depart a"));
+
+        - ==> Aggréger le tout (grouper liens par département) !
+
+    ---- Scrapper les données de ville ----
+        - Pour chaque lien de ville :
+            - Récupérer le lien de la page
+                ==> Via le contexte juste au-dessus
+            - Récupérer le département : 
+                ==> Via le contexte juste au-dessus
+            - Touver le nom de la ville + code postal :
+                const title = document.querySelector("h1").textContent
+                // Regex pour récupérer les 2 groupes
+                // Syntaxe : "[NOM VILLE] ([CODE POSTAL])"
+                const m = title.match(/(.*) \((.*)\)/);
+                const city = m[1];
+                const postalCode = m[2]
+            - Trouver les notes : 
+                const l = Array.from(document.querySelectorAll("table#tablonotes td"))
+                ==> Check si les notes sont présentes ou non : 
+                    document.querySelector("p#ng").textContent === ' - / 10'
+                    ==> boolean pour indiquer si on a des notes ou non !!
+                // Si les notes sont présentes :
+                const scoreList = l.map(td => Number.parseFloat(td.innerText.replace(',', '.')))
+                const scores = {
+                    'environment': scoreList[0],
+                    'transports': scoreList[1],
+                    'security': scoreList[2],
+                    'health': scoreList[3],
+                    'hobbies': scoreList[4],
+                    'culture': scoreList[5],
+                    'education': scoreList[6],
+                    'shops': scoreList[7],
+                    'quality_of_life': scoreList[8],
+                }
+                // Sinon
+                const scores = {
+                    'environment': -1,
+                    'transports': -1,
+                    'security': -1,
+                    'health': -1,
+                    'hobbies': -1,
+                    'culture': -1,
+                    'education': -1,
+                    'shops': -1,
+                    'quality_of_life': -1,
+                }
+            - Trouver les villes à proximité :
+                const prox = Array.from(document.querySelectorAll("div#vilprox a"))
+                const proxUrls = prox.map(a => a.href)
+
+            - Création de l'objet final : 
+                const city = {
+                    url: // url,
+                    title: title,
+                    name: city,
+                    postalCode: postalCode,
+                    scores: scores,
+                    ratedCityUrlsNearby: proxUrls
+                }
