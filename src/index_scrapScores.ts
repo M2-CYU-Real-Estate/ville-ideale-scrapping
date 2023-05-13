@@ -1,4 +1,4 @@
-import { openSync, writeFileSync } from "fs";
+import { openSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import { findCityUrls } from "./find-city-urls";
 import { createBrowser } from "./puppeteer-utils";
@@ -13,18 +13,24 @@ function saveAsJson(data: object, filename: string) {
     writeFileSync(file, JSON.stringify(data));
 }
 
+function loadJson(filename: string) {
+    const file = openSync(resolve(OUTPUT_PATH, filename), "r");
+    const buffer = readFileSync(file, 'utf-8');
+    const obj = JSON.parse(buffer);
+    return new Map<string, string[]>(Object.entries(obj));
+}
+
 async function main() {
     console.info("Open the browser");
     const [browser, page] = await createBrowser(true);
 
-    console.info("==== Find all city urls ====");
-    const cityUrlsByDepartment = await findCityUrls(page);
-    // Save this
-    saveAsJson(cityUrlsByDepartment, CITY_URLS_FILE_PATH);
+    // Read file in "out" folder
+    const cityUrlsByDepartment = loadJson(CITY_URLS_FILE_PATH);
 
     // Step 2, find the city scores
+    console.info("==== Find scores ====");
     const start = new Date().getTime();
-    for (const [department, cityUrls] of Object.entries(cityUrlsByDepartment)) {
+    for (const [department, cityUrls] of cityUrlsByDepartment) {
         const startDepartmentDate = new Date().getTime();
         const infos = await findCityScores(department, cityUrls, page);
         const endDepartmentDate = new Date().getTime();

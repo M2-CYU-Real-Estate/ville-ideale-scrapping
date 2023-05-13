@@ -71,3 +71,15 @@ WARNING : très contraingnant sur le nombre de requêtes passées, probablement 
                     scores: scores,
                     ratedCityUrlsNearby: proxUrls
                 }
+
+            - export interface CityInformation {
+                url: string;
+                title: string;
+                name: string;
+                postalCode: string;
+                department: string;
+                areScoresPresent: boolean;
+                scores: CityScores;
+                normalizedScores: CityScores;
+                ratedCityUrlsNearby: string[];
+            }
